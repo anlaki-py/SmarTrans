@@ -38,15 +38,14 @@ class KeyManager(context: Context) {
         private const val CACHE_TTL_MS = 5_000L
     }
 
-    /** Per-provider rate-limited key tracking (key → cooldown-end timestamp). */
-    private val rateLimitedKeys = ConcurrentHashMap<String, Long>()
+    /** Per-provider rate-limited key tracking: providerId → (key → cooldown-end timestamp). */
+    private val rateLimitedKeys = ConcurrentHashMap<String, ConcurrentHashMap<String, Long>>()
 
-    /** Per-provider set of permanently invalid keys. */
-    private val invalidKeys: MutableSet<String> = java.util.Collections.newSetFromMap(
-        ConcurrentHashMap<String, Boolean>()
-    )
+    /** Per-provider set of permanently invalid keys: providerId → Set<key>. */
+    private val invalidKeys = ConcurrentHashMap<String, MutableSet<String>>()
 
-    private val roundRobinIndex = AtomicInteger(0)
+    /** Per-provider round-robin index: providerId → AtomicInteger. */
+    private val roundRobinIndices = ConcurrentHashMap<String, AtomicInteger>()
 
     /** Per-provider key cache: providerId → (list, timestamp). */
     private val cache = ConcurrentHashMap<String, Pair<List<String>, Long>>()
@@ -195,7 +194,7 @@ class KeyManager(context: Context) {
             keys.add(key)
             if (!saveKeys(providerId, keys)) return false
         }
-        invalidKeys.remove(key)
+        invalidKeys[providerId]?.remove(key)
         return true
     }
 
@@ -211,8 +210,8 @@ class KeyManager(context: Context) {
         val keys = getKeys(providerId).toMutableList()
         keys.remove(key)
         val saved = saveKeys(providerId, keys)
-        rateLimitedKeys.remove(key)
-        invalidKeys.remove(key)
+        rateLimitedKeys[providerId]?.remove(key)
+        invalidKeys[providerId]?.remove(key)
         return saved
     }
 
@@ -225,6 +224,9 @@ class KeyManager(context: Context) {
     fun removeKeysForProvider(providerId: String) {
         prefs.edit().remove(KEY_PREFIX + providerId).apply()
         cache.remove(providerId)
+        rateLimitedKeys.remove(providerId)
+        invalidKeys.remove(providerId)
+        roundRobinIndices.remove(providerId)
     }
 
     /**
@@ -238,34 +240,45 @@ class KeyManager(context: Context) {
         val keys = getKeys(providerId)
         if (keys.isEmpty()) return null
         val now = System.currentTimeMillis()
+        val providerInvalid = invalidKeys.getOrPut(providerId) {
+            java.util.Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
+        }
+        val providerRateLimited = rateLimitedKeys.getOrPut(providerId) { ConcurrentHashMap() }
         val validKeys = keys.filter { key ->
-            if (invalidKeys.contains(key)) return@filter false
-            val limitTime = rateLimitedKeys[key] ?: 0L
+            if (providerInvalid.contains(key)) return@filter false
+            val limitTime = providerRateLimited[key] ?: 0L
             now > limitTime
         }
         if (validKeys.isEmpty()) return null
-        val idx = (roundRobinIndex.getAndIncrement() and Int.MAX_VALUE) % validKeys.size
+        val index = roundRobinIndices.getOrPut(providerId) { AtomicInteger(0) }
+        val idx = (index.getAndIncrement() and Int.MAX_VALUE) % validKeys.size
         return validKeys[idx]
     }
 
     /**
      * Marks a key as rate-limited with a cooldown period.
      *
+     * @param providerId The UUID of the provider.
      * @param key The rate-limited API key.
      * @param retryAfterSeconds Cooldown duration (clamped to 1–600s).
      */
-    fun reportRateLimit(key: String, retryAfterSeconds: Long = 60) {
+    fun reportRateLimit(providerId: String, key: String, retryAfterSeconds: Long = 60) {
         val cooldown = retryAfterSeconds.coerceIn(1, 600)
-        rateLimitedKeys[key] = System.currentTimeMillis() + cooldown * 1_000
+        val map = rateLimitedKeys.getOrPut(providerId) { ConcurrentHashMap() }
+        map[key] = System.currentTimeMillis() + cooldown * 1_000
     }
 
     /**
      * Marks a key as permanently invalid (e.g. revoked or wrong).
      *
+     * @param providerId The UUID of the provider.
      * @param key The invalid API key.
      */
-    fun markInvalid(key: String) {
-        invalidKeys.add(key)
+    fun markInvalid(providerId: String, key: String) {
+        val set = invalidKeys.getOrPut(providerId) {
+            java.util.Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
+        }
+        set.add(key)
     }
 
     /**
@@ -278,10 +291,12 @@ class KeyManager(context: Context) {
         val keys = getKeys(providerId)
         if (keys.isEmpty()) return null
         val now = System.currentTimeMillis()
+        val providerInvalid = invalidKeys[providerId] ?: emptySet()
+        val providerRateLimited = rateLimitedKeys[providerId] ?: emptyMap()
         val waits = keys
-            .filter { !invalidKeys.contains(it) }
+            .filter { !providerInvalid.contains(it) }
             .mapNotNull { key ->
-                val limitTime = rateLimitedKeys[key] ?: return@mapNotNull null
+                val limitTime = providerRateLimited[key] ?: return@mapNotNull null
                 val remaining = limitTime - now
                 if (remaining > 0) remaining else null
             }

@@ -187,14 +187,21 @@ fun SettingsScreen(
     }
 
     if (editingProvider != null || creatingNewProvider) {
+        val providerId = editingProvider?.id ?: ""
         ProviderEditDialog(
             provider = editingProvider,
+            storedKeys = state.providerKeys[providerId] ?: emptyList(),
             onDismiss = { editingProvider = null; creatingNewProvider = false },
             onSave = { newProvider, isNew ->
                 viewModel.saveProvider(newProvider, isNew)
                 editingProvider = null; creatingNewProvider = false
             },
             onDelete = { editingProvider?.let { viewModel.deleteProvider(it.id) }; editingProvider = null },
+            onAddKey = { key ->
+                val endpoint = editingProvider?.endpoint ?: ""
+                viewModel.validateAndAddKey(providerId, key, endpoint)
+            },
+            onRemoveKey = { key -> viewModel.removeKey(providerId, key) },
             isCreating = creatingNewProvider
         )
     }

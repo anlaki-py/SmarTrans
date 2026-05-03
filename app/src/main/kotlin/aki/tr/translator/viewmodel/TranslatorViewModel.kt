@@ -114,19 +114,58 @@ class TranslatorViewModel(
     }
 
     /**
-     * Executes the translation API call and maps errors to user-facing messages.
+     * Executes the translation API call with key rotation.
+     *
+     * Iterates through available API keys for the provider, skipping rate-limited
+     * and invalid keys. Stops on first success or when all keys are exhausted.
      */
     private fun performTranslation(text: String) {
         val config = _uiState.value.config
         val provider = _uiState.value.currentProvider ?: return
         val language = config.languages.find { it.id == config.selectedLanguageId } ?: return
-        val apiKey = keyManager.getNextKey(provider.id) ?: return
 
         translationJob?.cancel()
         translationJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             val prompt = "${config.systemPrompt}\n${language.instruction}"
+            val result = tryGenerateWithRotation(provider, prompt, text)
+
+            if (result.isSuccess) {
+                _uiState.update {
+                    it.copy(output = result.getOrNull()?.text ?: "", isLoading = false)
+                }
+            } else {
+                val errorMessage = result.exceptionOrNull()?.message ?: "Unknown error"
+                _uiState.update { it.copy(output = "", error = errorMessage, isLoading = false) }
+            }
+        }
+    }
+
+    /**
+     * Attempts translation with key rotation.
+     *
+     * Tries each available key in round-robin order. On rate-limit or invalid-key
+     * errors, marks the key and tries the next one. Returns the first success or
+     * the final error after all keys are exhausted.
+     *
+     * @param provider The selected provider.
+     * @param prompt The full prompt including system and language instructions.
+     * @param text The user input text.
+     * @return [Result] wrapping [GenerateResult] on success, or failure with the last error.
+     */
+    private suspend fun tryGenerateWithRotation(
+        provider: Provider,
+        prompt: String,
+        text: String
+    ): Result<aki.tr.api.model.GenerateResult> {
+        val providerId = provider.id
+        val attemptedKeys = mutableSetOf<String>()
+
+        while (true) {
+            val apiKey = keyManager.getNextKey(providerId) ?: break
+            if (!attemptedKeys.add(apiKey)) break // No new keys left
+
             val result = apiClient.generate(
                 prompt = prompt,
                 text = text,
@@ -136,37 +175,34 @@ class TranslatorViewModel(
                 endpoint = provider.endpoint
             )
 
-            if (result.isSuccess) {
-                _uiState.update {
-                    it.copy(output = result.getOrNull()?.text ?: "", isLoading = false)
+            if (result.isSuccess) return result
+
+            val exception = result.exceptionOrNull()
+            if (exception is ApiException) {
+                when (exception.apiError) {
+                    is ApiError.RateLimit -> {
+                        val retryAfter = (exception.apiError as ApiError.RateLimit).retryAfterSeconds
+                        keyManager.reportRateLimit(providerId, apiKey, retryAfter?.toLong() ?: 60)
+                        continue // Try next key
+                    }
+                    is ApiError.InvalidKey -> {
+                        keyManager.markInvalid(providerId, apiKey)
+                        continue // Try next key
+                    }
+                    else -> return result // Non-rotatable error
                 }
             } else {
-                val errorMessage = mapApiError(result.exceptionOrNull(), apiKey)
-                _uiState.update { it.copy(output = "", error = errorMessage, isLoading = false) }
+                return result // Non-ApiException error
             }
         }
-    }
 
-    /**
-     * Maps an API exception to a user-facing string and reports issues to [KeyManager].
-     */
-    private fun mapApiError(exception: Throwable?, apiKey: String): String {
-        if (exception is ApiException) {
-            return when (exception.apiError) {
-                is ApiError.RateLimit -> {
-                    keyManager.reportRateLimit(apiKey)
-                    "Rate limited. Please try again later."
-                }
-                is ApiError.InvalidKey -> {
-                    keyManager.markInvalid(apiKey)
-                    "Invalid API key. Please check your settings."
-                }
-                is ApiError.Network -> "Network error. Please check your connection."
-                is ApiError.ServerError -> "Server error. Please try again later."
-                is ApiError.Other -> exception.message ?: "Unknown error"
-            }
+        // All keys exhausted or none available
+        val waitTime = keyManager.getShortestWaitTimeMs(providerId)
+        return if (waitTime != null) {
+            Result.failure(Exception("All keys rate-limited. Retry in ${waitTime / 1000}s."))
+        } else {
+            Result.failure(Exception("No valid API keys available. Please check your settings."))
         }
-        return exception?.message ?: "Unknown error"
     }
 
     companion object {
