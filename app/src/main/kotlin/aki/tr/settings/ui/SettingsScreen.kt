@@ -78,7 +78,6 @@ fun SettingsScreen(
                 title = { Text("Settings") },
                 navigationIcon = {
                     IconButton(onClick = {
-                        viewModel.saveConfig(state.config.copy(systemPrompt = sysPrompt))
                         onBack()
                     }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -99,7 +98,10 @@ fun SettingsScreen(
                 SectionHeader("SYSTEM PROMPT")
                 OutlinedTextField(
                     value = sysPrompt,
-                    onValueChange = { sysPrompt = it },
+                    onValueChange = {
+                        sysPrompt = it
+                        viewModel.saveConfig(state.config.copy(systemPrompt = it))
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
