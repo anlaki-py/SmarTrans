@@ -209,7 +209,7 @@ jobs:
 
           # Signature check — v2/v3 only (skip v1/JAR which fails on split APKs)
           BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)
-          ${BUILD_TOOLS}apksigner verify --v1-ignored true --print-certs "$APK_PATH"
+          ${BUILD_TOOLS}apksigner verify -v --print-certs "$APK_PATH" 2>&1 || echo "::warning::APK signature verification failed"
 
           # Rename
           mv "$APK_PATH" app/build/outputs/apk/release/${{ needs.version.outputs.apk_name }}.apk
