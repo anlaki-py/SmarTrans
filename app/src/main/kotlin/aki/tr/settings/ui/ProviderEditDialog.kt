@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -23,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import aki.tr.config.model.LanguageProfile
 import aki.tr.provider.validation.EndpointValidation
+import aki.tr.provider.validation.EndpointValidationResult
 import aki.tr.provider.model.Provider
 
 /**
@@ -64,7 +66,7 @@ fun ProviderEditDialog(
                     value = endpoint,
                     onValueChange = {
                         endpoint = it
-                        endpointError = EndpointValidation.validate(it) is EndpointValidation.Error
+                        endpointError = EndpointValidation.validate(it) is EndpointValidationResult.Error
                     },
                     label = { Text("Base URL") },
                     singleLine = true,

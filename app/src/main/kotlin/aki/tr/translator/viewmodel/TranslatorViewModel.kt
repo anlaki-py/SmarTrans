@@ -163,7 +163,7 @@ class TranslatorViewModel(
                 }
                 is ApiError.Network -> "Network error. Please check your connection."
                 is ApiError.ServerError -> "Server error. Please try again later."
-                is ApiError.Other -> exception.message
+                is ApiError.Other -> exception.message ?: "Unknown error"
             }
         }
         return exception?.message ?: "Unknown error"
