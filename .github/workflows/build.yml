@@ -189,9 +189,10 @@ jobs:
       - name: Verify APK and log size
         shell: bash
         run: |
-          APK_PATH=$(ls app/build/outputs/apk/release/app-*-release.apk 2>/dev/null | head -1)
+          APK_PATH=$(find app/build/outputs/apk/release -name '*.apk' | head -1)
           if [ -z "$APK_PATH" ]; then
             echo "::error::APK not found in app/build/outputs/apk/release/"
+            ls -lR app/build/outputs/apk/ || true
             exit 1
           fi
           SIZE=$(stat -c%s "$APK_PATH")
@@ -207,13 +208,13 @@ jobs:
         shell: bash
         run: |
           BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)
-          APK_PATH=$(ls app/build/outputs/apk/release/app-*-release.apk | head -1)
+          APK_PATH=$(find app/build/outputs/apk/release -name '*.apk' | head -1)
           ${BUILD_TOOLS}apksigner verify --print-certs "$APK_PATH"
 
       - name: Rename APK
         shell: bash
         run: |
-          APK_PATH=$(ls app/build/outputs/apk/release/app-*-release.apk | head -1)
+          APK_PATH=$(find app/build/outputs/apk/release -name '*.apk' | head -1)
           mv "$APK_PATH" app/build/outputs/apk/release/${{ needs.version.outputs.apk_name }}.apk
 
       - name: Upload APK artifact
