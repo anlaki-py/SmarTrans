@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -23,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,8 +30,6 @@ import androidx.compose.ui.unit.dp
 import aki.tr.provider.model.Provider
 import aki.tr.provider.validation.EndpointValidation
 import aki.tr.provider.validation.EndpointValidationResult
-import aki.tr.provider.validation.KeyValidationResult
-import kotlinx.coroutines.launch
 
 /**
  * Dialog for creating or editing a provider.
@@ -44,7 +40,7 @@ import kotlinx.coroutines.launch
  * @param onDismiss Callback when the dialog is dismissed.
  * @param onSave Callback with the updated provider and whether it is new.
  * @param onDelete Callback to delete the provider (hidden for new providers).
- * @param onAddKey Callback to validate and add a new key.
+ * @param onAddKey Callback to add a new key.
  * @param onRemoveKey Callback to remove a stored key.
  * @param isCreating True if this is a new provider creation.
  */
@@ -55,7 +51,7 @@ fun ProviderEditDialog(
     onDismiss: () -> Unit,
     onSave: (Provider, Boolean) -> Unit,
     onDelete: () -> Unit,
-    onAddKey: suspend (String) -> KeyValidationResult,
+    onAddKey: (String) -> Unit,
     onRemoveKey: (String) -> Unit,
     isCreating: Boolean
 ) {
@@ -67,9 +63,6 @@ fun ProviderEditDialog(
 
     var newKey by remember { mutableStateOf("") }
     var keyError by remember { mutableStateOf<String?>(null) }
-    var isValidating by remember { mutableStateOf(false) }
-
-    val scope = rememberCoroutineScope()
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -150,29 +143,16 @@ fun ProviderEditDialog(
                             TextButton(
                                 onClick = {
                                     if (newKey.isBlank()) return@TextButton
-                                    if (EndpointValidation.isSafeToSave(endpoint).not()) {
-                                        keyError = "Enter a valid endpoint first"
+                                    val trimmed = newKey.trim()
+                                    if (storedKeys.contains(trimmed)) {
+                                        keyError = "Key already added"
                                         return@TextButton
                                     }
-                                    isValidating = true
-                                    scope.launch {
-                                        val result = onAddKey(newKey.trim())
-                                        isValidating = false
-                                        when (result) {
-                                            is KeyValidationResult.Valid -> {
-                                                newKey = ""
-                                                keyError = null
-                                            }
-                                            is KeyValidationResult.Duplicate -> {
-                                                keyError = "Key already added"
-                                            }
-                                            is KeyValidationResult.Invalid -> {
-                                                keyError = result.message
-                                            }
-                                        }
-                                    }
+                                    onAddKey(trimmed)
+                                    newKey = ""
+                                    keyError = null
                                 },
-                                enabled = newKey.isNotBlank() && !isValidating,
+                                enabled = newKey.isNotBlank(),
                                 modifier = Modifier.padding(end = 8.dp)
                             ) { Text("Add") }
                         },

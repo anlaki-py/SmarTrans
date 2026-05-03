@@ -98,31 +98,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     /**
-     * Validates and adds an API key for a provider.
+     * Adds an API key for a provider without network validation.
+     *
+     * Duplicate keys are ignored.
      *
      * @param providerId The provider UUID.
      * @param key The API key to add.
-     * @param endpoint The provider endpoint for validation.
-     * @return [KeyValidationResult] indicating the outcome.
      */
-    suspend fun validateAndAddKey(
-        providerId: String,
-        key: String,
-        endpoint: String
-    ): KeyValidationResult {
-        val existingKeys = keyManager.getKeys(providerId)
-        val result = KeyValidation.validate(
-            key = key,
-            endpoint = endpoint,
-            existingKeys = existingKeys,
-            client = apiClient,
-            fallbackErrorMessage = "Validation failed"
-        )
-        if (result is KeyValidationResult.Valid) {
-            keyManager.addKey(providerId, key)
-            refreshKeys()
-        }
-        return result
+    fun addKey(providerId: String, key: String) {
+        keyManager.addKey(providerId, key)
+        refreshKeys()
     }
 
     /**

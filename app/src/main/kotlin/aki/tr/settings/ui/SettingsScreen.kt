@@ -198,8 +198,7 @@ fun SettingsScreen(
             },
             onDelete = { editingProvider?.let { viewModel.deleteProvider(it.id) }; editingProvider = null },
             onAddKey = { key ->
-                val endpoint = editingProvider?.endpoint ?: ""
-                viewModel.validateAndAddKey(providerId, key, endpoint)
+                viewModel.addKey(providerId, key)
             },
             onRemoveKey = { key -> viewModel.removeKey(providerId, key) },
             isCreating = creatingNewProvider
