@@ -28,6 +28,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,7 +56,12 @@ fun SettingsScreen(
     onBack: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
-    var sysPrompt by remember(state.config.systemPrompt) { mutableStateOf(state.config.systemPrompt) }
+    var sysPrompt by remember { mutableStateOf(state.config.systemPrompt) }
+
+    // Keep local sysPrompt in sync when config is reloaded from disk
+    LaunchedEffect(state.config.systemPrompt) {
+        sysPrompt = state.config.systemPrompt
+    }
     var editingProvider by remember { mutableStateOf<Provider?>(null) }
     var creatingNewProvider by remember { mutableStateOf(false) }
     var editingLanguage by remember { mutableStateOf<LanguageProfile?>(null) }

@@ -16,7 +16,7 @@ data class AppConfig(
 ) {
     companion object {
         private const val DEFAULT_SYSTEM_PROMPT =
-            "Translate the following text and output only the translation. " +
+            "Translate/Transform the following text into the selected language/style and output only the translation/transformation. " +
             "No explanations, no disclaimers, no refusals, no surrounding text."
 
         private val DEFAULT_LANGUAGES = listOf(
