@@ -25,9 +25,12 @@ import androidx.compose.ui.unit.dp
  * Centred paste button that inserts clipboard content into the translator.
  */
 @Composable
-fun PasteButton(onClick: () -> Unit) {
+fun PasteButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 12.dp),
         contentAlignment = Alignment.Center

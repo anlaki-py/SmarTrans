@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -106,18 +107,26 @@ fun TranslatorScreen(
                 .padding(innerPadding)
                 .consumeWindowInsets(innerPadding)
         ) {
-            InputSection(
-                input = state.input,
-                onInputChange = { viewModel.onInputChange(it) },
-                isInputRtl = isInputRtl,
-                weightFraction = inputWeight,
-                inputScrollState = inputScrollState
-            )
-            PasteButton(
-                onClick = {
-                    clipboard.getText()?.text?.let { viewModel.onInputChange(it.toString()) }
-                }
-            )
+            // Input + PasteButton overlaid so fade extends under the button
+            Box(
+                modifier = Modifier
+                    .weight(inputWeight)
+                    .fillMaxWidth()
+            ) {
+                InputSection(
+                    input = state.input,
+                    onInputChange = { viewModel.onInputChange(it) },
+                    isInputRtl = isInputRtl,
+                    inputScrollState = inputScrollState,
+                    modifier = Modifier.fillMaxSize()
+                )
+                PasteButton(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    onClick = {
+                        clipboard.getText()?.text?.let { viewModel.onInputChange(it.toString()) }
+                    }
+                )
+            }
             OutputSection(
                 state = state,
                 outputLayoutDir = outputLayoutDir,

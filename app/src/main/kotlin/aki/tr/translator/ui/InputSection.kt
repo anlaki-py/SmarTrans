@@ -4,7 +4,6 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,74 +29,72 @@ import aki.tr.ui.components.fadingEdge
 
 /**
  * Input text area with a label, clear button, and RTL-aware text field.
+ * The fade is applied to the text area so it extends to the bottom of this composable.
  */
 @Composable
-fun ColumnScope.InputSection(
+fun InputSection(
     input: String,
     onInputChange: (String) -> Unit,
     isInputRtl: Boolean,
-    weightFraction: Float,
-    inputScrollState: ScrollState
+    inputScrollState: ScrollState,
+    modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = Modifier
-            .weight(weightFraction)
-            .fillMaxWidth()
+    Column(
+        modifier = modifier
             .padding(horizontal = 24.dp, vertical = 8.dp)
     ) {
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "INPUT",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
-                if (input.isNotEmpty()) {
-                    IconButton(
-                        onClick = { onInputChange("") },
-                        modifier = Modifier.size(24.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = "Clear",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fadingEdge(inputScrollState)
-            ) {
-                if (input.isEmpty()) {
-                    Text(
-                        "Enter text...",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "INPUT",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+            if (input.isNotEmpty()) {
+                IconButton(
+                    onClick = { onInputChange("") },
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = "Clear",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                BasicTextField(
-                    value = input,
-                    onValueChange = onInputChange,
-                    textStyle = MaterialTheme.typography.headlineMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = if (isInputRtl) TextAlign.End else TextAlign.Start,
-                        textDirection = if (isInputRtl) TextDirection.Rtl else TextDirection.Ltr
-                    ),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(inputScrollState)
+            }
+        }
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .fadingEdge(inputScrollState)
+        ) {
+            if (input.isEmpty()) {
+                Text(
+                    "Enter text...",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                 )
             }
+            BasicTextField(
+                value = input,
+                onValueChange = onInputChange,
+                textStyle = MaterialTheme.typography.headlineMedium.copy(
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = if (isInputRtl) TextAlign.End else TextAlign.Start,
+                    textDirection = if (isInputRtl) TextDirection.Rtl else TextDirection.Ltr
+                ),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(inputScrollState)
+            )
         }
     }
 }
