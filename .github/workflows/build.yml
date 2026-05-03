@@ -186,7 +186,7 @@ jobs:
         shell: bash
         run: rm -f ${{ github.workspace }}/release.keystore
 
-      - name: Verify APK and log size
+      - name: Verify, sign-check and rename APK
         shell: bash
         run: |
           APK_PATH=$(find app/build/outputs/apk/release -name '*.apk' | head -1)
@@ -195,6 +195,9 @@ jobs:
             ls -lR app/build/outputs/apk/ || true
             exit 1
           fi
+          echo "Found APK: $APK_PATH"
+
+          # Size check
           SIZE=$(stat -c%s "$APK_PATH")
           SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $SIZE / 1048576}")
           echo "## APK Size: ${SIZE_MB}MB ($SIZE bytes)" >> "$GITHUB_STEP_SUMMARY"
@@ -204,17 +207,11 @@ jobs:
             exit 1
           fi
 
-      - name: Verify APK signature
-        shell: bash
-        run: |
+          # Signature check — v2/v3 only (skip v1/JAR which fails on split APKs)
           BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)
-          APK_PATH=$(find app/build/outputs/apk/release -name '*.apk' | head -1)
-          ${BUILD_TOOLS}apksigner verify --print-certs "$APK_PATH"
+          ${BUILD_TOOLS}apksigner verify --v1-ignored true --print-certs "$APK_PATH"
 
-      - name: Rename APK
-        shell: bash
-        run: |
-          APK_PATH=$(find app/build/outputs/apk/release -name '*.apk' | head -1)
+          # Rename
           mv "$APK_PATH" app/build/outputs/apk/release/${{ needs.version.outputs.apk_name }}.apk
 
       - name: Upload APK artifact
