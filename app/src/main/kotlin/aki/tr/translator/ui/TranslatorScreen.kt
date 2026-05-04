@@ -105,7 +105,7 @@ fun TranslatorScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(top = innerPadding.calculateTopPadding())
                 .consumeWindowInsets(innerPadding)
         ) {
             // Input + PasteButton overlaid so fade extends under the button
