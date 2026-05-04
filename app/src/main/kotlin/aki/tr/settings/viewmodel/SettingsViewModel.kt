@@ -3,14 +3,13 @@ package aki.tr.settings.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import aki.tr.api.data.ModelFetcher
 import aki.tr.api.data.OpenAICompatibleClient
 import aki.tr.config.data.ConfigRepository
 import aki.tr.config.model.AppConfig
 import aki.tr.key.data.KeyManager
 import aki.tr.provider.data.ProviderManager
 import aki.tr.provider.model.Provider
-import aki.tr.provider.validation.KeyValidation
-import aki.tr.provider.validation.KeyValidationResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,7 +26,11 @@ import kotlinx.coroutines.launch
 data class SettingsUiState(
     val config: AppConfig = AppConfig(),
     val providers: List<Provider> = emptyList(),
-    val providerKeys: Map<String, List<String>> = emptyMap()
+    val providerKeys: Map<String, List<String>> = emptyMap(),
+    val fetchedModels: List<String> = emptyList(),
+    val isFetchingModels: Boolean = false,
+    val modelFetchError: String? = null,
+    val modelSearchQuery: String = ""
 )
 
 /**
@@ -144,6 +147,62 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             )
         }
         ConfigRepository.saveConfig(_uiState.value.config)
+    }
+
+    /**
+     * Fetches available models from the provider's /models endpoint.
+     * Uses the first available API key for the provider.
+     *
+     * @param providerId The provider UUID to fetch models for.
+     */
+    fun fetchModels(providerId: String) {
+        val provider = _uiState.value.providers.find { it.id == providerId } ?: return
+        val keys = keyManager.getKeys(providerId)
+        if (keys.isEmpty()) {
+            _uiState.update { it.copy(modelFetchError = "No API keys available for this provider") }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isFetchingModels = true, modelFetchError = null, fetchedModels = emptyList()) }
+            val result = ModelFetcher.fetchModels(keys.first(), provider.endpoint)
+            _uiState.update {
+                if (result.isSuccess) {
+                    it.copy(
+                        fetchedModels = result.getOrDefault(emptyList()),
+                        isFetchingModels = false,
+                        modelFetchError = null
+                    )
+                } else {
+                    it.copy(
+                        isFetchingModels = false,
+                        modelFetchError = result.exceptionOrNull()?.message ?: "Failed to fetch models"
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Updates the model search query for filtering fetched models.
+     *
+     * @param query The search string.
+     */
+    fun setModelSearchQuery(query: String) {
+        _uiState.update { it.copy(modelSearchQuery = query) }
+    }
+
+    /**
+     * Clears fetched models and related state.
+     */
+    fun clearFetchedModels() {
+        _uiState.update {
+            it.copy(
+                fetchedModels = emptyList(),
+                modelFetchError = null,
+                modelSearchQuery = ""
+            )
+        }
     }
 
     /**

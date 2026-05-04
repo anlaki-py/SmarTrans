@@ -173,16 +173,30 @@ fun SettingsScreen(
         ProviderEditDialog(
             provider = editingProvider,
             storedKeys = state.providerKeys[providerId] ?: emptyList(),
-            onDismiss = { editingProvider = null; creatingNewProvider = false },
-            onSave = { newProvider, isNew ->
-                viewModel.saveProvider(newProvider, isNew)
+            fetchedModels = state.fetchedModels,
+            isFetchingModels = state.isFetchingModels,
+            modelFetchError = state.modelFetchError,
+            modelSearchQuery = state.modelSearchQuery,
+            onDismiss = {
+                viewModel.clearFetchedModels()
                 editingProvider = null; creatingNewProvider = false
             },
-            onDelete = { editingProvider?.let { viewModel.deleteProvider(it.id) }; editingProvider = null },
+            onSave = { newProvider, isNew ->
+                viewModel.saveProvider(newProvider, isNew)
+                viewModel.clearFetchedModels()
+                editingProvider = null; creatingNewProvider = false
+            },
+            onDelete = {
+                editingProvider?.let { viewModel.deleteProvider(it.id) }
+                viewModel.clearFetchedModels()
+                editingProvider = null
+            },
             onAddKey = { key ->
                 viewModel.addKey(providerId, key)
             },
             onRemoveKey = { key -> viewModel.removeKey(providerId, key) },
+            onFetchModels = { editingProvider?.let { viewModel.fetchModels(it.id) } },
+            onModelSearchQueryChange = { viewModel.setModelSearchQuery(it) },
             isCreating = creatingNewProvider
         )
     }
