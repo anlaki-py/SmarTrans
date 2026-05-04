@@ -98,7 +98,11 @@ fun ProviderEditDialog(
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.verticalScroll(rememberScrollState())
+                modifier = if (showModelPicker && !isCreating) {
+                    Modifier
+                } else {
+                    Modifier.verticalScroll(rememberScrollState())
+                }
             ) {
                 OutlinedTextField(
                     value = name,
@@ -363,6 +367,7 @@ private fun ModelPickerSection(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .heightIn(max = 280.dp)
                         .padding(top = 4.dp)
                 ) {
                     items(filteredModels, key = { it }) { modelId ->
