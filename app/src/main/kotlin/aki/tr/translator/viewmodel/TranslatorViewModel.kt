@@ -128,7 +128,7 @@ class TranslatorViewModel(
         translationJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            val prompt = "${config.systemPrompt}\n${language.instruction}"
+            val prompt = language.instruction
             val result = tryGenerateWithRotation(provider, prompt, text)
 
             if (result.isSuccess) {

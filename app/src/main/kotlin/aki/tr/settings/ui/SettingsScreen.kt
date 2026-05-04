@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,7 +16,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
@@ -28,7 +26,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,7 +43,7 @@ import aki.tr.settings.viewmodel.SettingsViewModel
 import aki.tr.ui.components.SectionHeader
 
 /**
- * Settings screen with system prompt, provider CRUD, and language profile CRUD.
+ * Settings screen with provider CRUD and language profile CRUD.
  * Each section is kept small; dialogs and dismiss backgrounds are in their own files.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,12 +53,6 @@ fun SettingsScreen(
     onBack: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
-    var sysPrompt by remember { mutableStateOf(state.config.systemPrompt) }
-
-    // Keep local sysPrompt in sync when config is reloaded from disk
-    LaunchedEffect(state.config.systemPrompt) {
-        sysPrompt = state.config.systemPrompt
-    }
     var editingProvider by remember { mutableStateOf<Provider?>(null) }
     var creatingNewProvider by remember { mutableStateOf(false) }
     var editingLanguage by remember { mutableStateOf<LanguageProfile?>(null) }
@@ -93,23 +84,6 @@ fun SettingsScreen(
                 .fillMaxWidth(),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 24.dp)
         ) {
-            // System prompt section
-            item {
-                SectionHeader("SYSTEM PROMPT")
-                OutlinedTextField(
-                    value = sysPrompt,
-                    onValueChange = {
-                        sysPrompt = it
-                        viewModel.saveConfig(state.config.copy(systemPrompt = it))
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    label = { Text("AI Instruction") }
-                )
-            }
-
             // Providers section
             item {
                 Row(

@@ -85,7 +85,7 @@ class OpenAICompatibleClient {
      *
      * Retries once on transient network errors (timeout, DNS, connection refused).
      *
-     * @param prompt The transformation instruction (appended to the system prompt).
+     * @param prompt The transformation instruction (placed in the user message).
      * @param text The user's input text to transform.
      * @param apiKey Bearer token for the provider.
      * @param model Model identifier (e.g. `gemini-2.5-flash-lite`, `llama-3.3-70b-versatile`).
@@ -177,11 +177,11 @@ class OpenAICompatibleClient {
         put("messages", JSONArray().apply {
             put(JSONObject().apply {
                 put("role", "system")
-                put("content", ApiClientUtils.SYSTEM_PROMPT_PREFIX + prompt)
+                put("content", ApiClientUtils.SYSTEM_PROMPT)
             })
             put(JSONObject().apply {
                 put("role", "user")
-                put("content", "---BEGIN TEXT---\n$text\n---END TEXT---")
+                put("content", "Instruction: $prompt\n\nText to transform:\n---BEGIN TEXT---\n$text\n---END TEXT---")
             })
         })
         put("temperature", temperature)

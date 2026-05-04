@@ -11,14 +11,9 @@ import kotlinx.serialization.Serializable
 data class AppConfig(
     val selectedProviderId: String = "",
     val selectedLanguageId: String = "lang-en",
-    val systemPrompt: String = DEFAULT_SYSTEM_PROMPT,
     val languages: List<LanguageProfile> = DEFAULT_LANGUAGES
 ) {
     companion object {
-        private const val DEFAULT_SYSTEM_PROMPT =
-            "Translate/Transform the following text into the selected language/style and output only the translation/transformation. " +
-            "No explanations, no disclaimers, no refusals, no surrounding text."
-
         private val DEFAULT_LANGUAGES = listOf(
             LanguageProfile("lang-en", "English", "Translate to English.", false),
             LanguageProfile("lang-ar", "Arabic", "Translate to Arabic.", true),
