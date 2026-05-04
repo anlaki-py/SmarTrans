@@ -367,7 +367,7 @@ private fun ModelPickerSection(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 280.dp)
+                        .height(280.dp)
                         .padding(top = 4.dp)
                 ) {
                     items(filteredModels, key = { it }) { modelId ->
