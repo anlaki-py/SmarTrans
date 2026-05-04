@@ -175,9 +175,19 @@ fun SettingsScreen(
                     ) {
                         Text("Check for Updates")
                     }
+                    TextButton(
+                        onClick = {
+                            uriHandler.openUri("https://anlaki.dev")
+                        }
+                    ) {
+                        Text(
+                            text = "Developed by anlaki",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                     Text(
-                        text = "Developed by anlaki",
-                        style = MaterialTheme.typography.bodySmall,
+                        text = "v${aki.tr.BuildConfig.VERSION_NAME}",
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
