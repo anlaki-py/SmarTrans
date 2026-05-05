@@ -22,7 +22,8 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.LoadingIndicatorDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -99,11 +100,14 @@ fun ColumnScope.OutputSection(
                 ) {
                     when {
                         state.isLoading -> {
-                            LinearProgressIndicator(
+                            ContainedLoadingIndicator(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 12.dp),
-                                color = MaterialTheme.colorScheme.primary
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                indicatorColor = MaterialTheme.colorScheme.primary,
+                                containerShape = LoadingIndicatorDefaults.containerShape,
+                                polygons = LoadingIndicatorDefaults.IndeterminateIndicatorPolygons
                             )
                         }
                         state.error != null -> {

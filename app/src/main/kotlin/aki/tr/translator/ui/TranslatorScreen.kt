@@ -1,8 +1,7 @@
 package aki.tr.translator.ui
 
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,7 +56,7 @@ fun TranslatorScreen(
 
     val inputWeight by animateFloatAsState(
         targetValue = if (state.output.isNotEmpty() || state.isLoading) 0.6f else 1f,
-        animationSpec = spring(stiffness = Spring.StiffnessLow),
+        animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
         label = "weight"
     )
 

@@ -91,7 +91,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
 
     // Material 3
-    implementation("androidx.compose.material3:material3:1.3.1")
+    implementation("androidx.compose.material3:material3:1.4.0")
 
     // Icons — extended kept but R8 tree-shakes unused icons down to only what's referenced
     implementation("androidx.compose.material:material-icons-extended")

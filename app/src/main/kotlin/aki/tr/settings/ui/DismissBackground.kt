@@ -28,10 +28,12 @@ fun DismissBackground(targetValue: SwipeToDismissBoxValue) {
     val color by animateColorAsState(
         targetValue = if (targetValue == SwipeToDismissBoxValue.EndToStart)
             MaterialTheme.colorScheme.errorContainer else Color.Transparent,
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
         label = "bgColor"
     )
     val scale by animateFloatAsState(
         targetValue = if (targetValue == SwipeToDismissBoxValue.EndToStart) 1.2f else 0.8f,
+        animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
         label = "iconScale"
     )
     Box(
