@@ -27,6 +27,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -138,10 +139,13 @@ fun SettingsScreen(
                         } else false
                     }
                 )
+                LaunchedEffect(languageToDelete) {
+                    if (languageToDelete == null) dismissState.reset()
+                }
                 SwipeToDismissBox(
                     state = dismissState,
                     enableDismissFromStartToEnd = false,
-                    backgroundContent = { DismissBackground(dismissState.targetValue) },
+                    backgroundContent = { DismissBackground(dismissState.currentValue) },
                     content = {
                         ListItem(
                             headlineContent = { Text(lang.name) },

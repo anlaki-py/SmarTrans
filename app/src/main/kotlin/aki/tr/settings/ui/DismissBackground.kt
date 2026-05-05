@@ -26,15 +26,16 @@ import androidx.compose.ui.unit.dp
  */
 @Material3ExpressiveApi
 @Composable
-fun DismissBackground(targetValue: SwipeToDismissBoxValue) {
+fun DismissBackground(dismissValue: SwipeToDismissBoxValue) {
+    val isSettledDismissed = dismissValue == SwipeToDismissBoxValue.EndToStart
     val color by animateColorAsState(
-        targetValue = if (targetValue == SwipeToDismissBoxValue.EndToStart)
+        targetValue = if (isSettledDismissed)
             MaterialTheme.colorScheme.errorContainer else Color.Transparent,
         animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
         label = "bgColor"
     )
     val scale by animateFloatAsState(
-        targetValue = if (targetValue == SwipeToDismissBoxValue.EndToStart) 1.2f else 0.8f,
+        targetValue = if (isSettledDismissed) 1.2f else 0.8f,
         animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
         label = "iconScale"
     )
@@ -45,7 +46,7 @@ fun DismissBackground(targetValue: SwipeToDismissBoxValue) {
             .padding(horizontal = 24.dp),
         contentAlignment = Alignment.CenterEnd
     ) {
-        if (targetValue == SwipeToDismissBoxValue.EndToStart) {
+        if (isSettledDismissed) {
             Icon(
                 Icons.Default.Delete,
                 contentDescription = "Delete",
