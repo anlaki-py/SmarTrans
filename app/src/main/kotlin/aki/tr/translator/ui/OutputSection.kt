@@ -1,5 +1,8 @@
 package aki.tr.translator.ui
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,19 +22,24 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.LoadingIndicatorDefaults
 import androidx.compose.material3.Material3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
@@ -39,6 +47,38 @@ import androidx.compose.ui.unit.dp
 import aki.tr.config.model.LanguageProfile
 import aki.tr.translator.viewmodel.TranslatorUiState
 import aki.tr.ui.components.fadingEdge
+
+/**
+ * Primary action button for triggering manual translation.
+ * Presses with an expressive scale animation.
+ */
+@Material3ExpressiveApi
+@Composable
+private fun TranslateButton(onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1f,
+        animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
+        label = "translateScale"
+    )
+    Button(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .scale(scale),
+        interactionSource = interactionSource
+    ) {
+        Icon(Icons.Default.Translate, contentDescription = null)
+        Spacer(Modifier.width(8.dp))
+        Text("TRANSLATE", fontWeight = FontWeight.Bold)
+    }
+}
 
 /**
  * Output section showing the translated result, loading indicator, or error.
@@ -50,7 +90,8 @@ fun ColumnScope.OutputSection(
     state: TranslatorUiState,
     outputLayoutDir: LayoutDirection,
     currentLang: LanguageProfile?,
-    onCopy: () -> Unit
+    onCopy: () -> Unit,
+    onTranslate: () -> Unit
 ) {
     val outputScrollState = rememberScrollState()
     val weightFraction: Float = remember(state.output, state.isLoading) {
@@ -135,6 +176,12 @@ fun ColumnScope.OutputSection(
                             }
                         }
                     }
+                }
+
+                // Translate button shown when there's manual input and no active translation.
+                if (state.input.isNotBlank() && !state.isPasteTriggered && !state.isLoading && state.output.isEmpty()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TranslateButton(onClick = onTranslate)
                 }
             }
         }

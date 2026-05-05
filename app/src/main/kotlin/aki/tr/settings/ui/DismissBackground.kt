@@ -27,15 +27,17 @@ import androidx.compose.ui.unit.dp
 @Material3ExpressiveApi
 @Composable
 fun DismissBackground(dismissValue: SwipeToDismissBoxValue) {
-    val isSettledDismissed = dismissValue == SwipeToDismissBoxValue.EndToStart
+    // Show icon during swipe (EndToStart) and when settled at dismissed position.
+    // Settled == StartToEnd means the item is at rest in its original position.
+    val isSwiping = dismissValue != SwipeToDismissBoxValue.StartToEnd
     val color by animateColorAsState(
-        targetValue = if (isSettledDismissed)
+        targetValue = if (isSwiping)
             MaterialTheme.colorScheme.errorContainer else Color.Transparent,
         animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
         label = "bgColor"
     )
     val scale by animateFloatAsState(
-        targetValue = if (isSettledDismissed) 1.2f else 0.8f,
+        targetValue = if (isSwiping) 1.2f else 0.8f,
         animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
         label = "iconScale"
     )
@@ -46,7 +48,7 @@ fun DismissBackground(dismissValue: SwipeToDismissBoxValue) {
             .padding(horizontal = 24.dp),
         contentAlignment = Alignment.CenterEnd
     ) {
-        if (isSettledDismissed) {
+        if (isSwiping) {
             Icon(
                 Icons.Default.Delete,
                 contentDescription = "Delete",

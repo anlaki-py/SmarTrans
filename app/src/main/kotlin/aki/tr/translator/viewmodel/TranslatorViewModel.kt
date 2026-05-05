@@ -25,7 +25,8 @@ data class TranslatorUiState(
     val isLoading: Boolean = false,
     val config: AppConfig = AppConfig(),
     val providers: List<Provider> = emptyList(),
-    val error: String? = null
+    val error: String? = null,
+    val isPasteTriggered: Boolean = false
 ) {
     val hasOutput: Boolean get() = output.isNotEmpty()
     val hasInput: Boolean get() = input.isNotEmpty()
@@ -58,7 +59,12 @@ class TranslatorViewModel(
             inputFlow
                 .debounce(DEBOUNCE_DELAY)
                 .distinctUntilChanged()
-                .collect { text -> if (text.isNotBlank()) performTranslation(text) }
+                .collect { text ->
+                    // Only auto-translate if triggered by paste; manual typing waits for button.
+                    if (text.isNotBlank() && _uiState.value.isPasteTriggered) {
+                        performTranslation(text)
+                    }
+                }
         }
     }
 
@@ -91,16 +97,28 @@ class TranslatorViewModel(
     }
 
     /**
-     * Handles input text changes with debounced translation.
+     * Handles input text changes. Manual typing does not auto-translate.
+     * Clears output when input is empty.
      *
      * @param text The new input text.
      */
     fun onInputChange(text: String) {
-        _uiState.update { it.copy(input = text) }
+        _uiState.update { it.copy(input = text, isPasteTriggered = false) }
         if (text.isEmpty()) {
             _uiState.update { it.copy(output = "", isLoading = false) }
             translationJob?.cancel()
-        } else {
+        }
+    }
+
+    /**
+     * Called when the paste button is clicked. Sets the pasted text
+     * and flags it for auto-translation.
+     *
+     * @param text The pasted text.
+     */
+    fun onPaste(text: String) {
+        _uiState.update { it.copy(input = text, isPasteTriggered = true) }
+        if (text.isNotBlank()) {
             inputFlow.tryEmit(text)
         }
     }
