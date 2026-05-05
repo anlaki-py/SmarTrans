@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Material3ExpressiveApi
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import aki.tr.config.model.LanguageProfile
+import aki.tr.ui.components.ExpressiveTextButton
 
 /**
  * Dialog for creating or editing a language profile.
@@ -28,6 +29,7 @@ import aki.tr.config.model.LanguageProfile
  * @param onSave Callback with the updated language and whether it is new.
  * @param isCreating True if this is a new language creation.
  */
+@Material3ExpressiveApi
 @Composable
 fun LanguageEditDialog(
     language: LanguageProfile?,
@@ -66,7 +68,7 @@ fun LanguageEditDialog(
             }
         },
         confirmButton = {
-            TextButton(
+            ExpressiveTextButton(
                 onClick = {
                     onSave(target.copy(name = name, instruction = instruction, isRtl = isRtl), isCreating)
                 },
@@ -74,7 +76,7 @@ fun LanguageEditDialog(
             ) { Text("Save") }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            ExpressiveTextButton(onClick = onDismiss) { Text("Cancel") }
         }
     )
 }

@@ -15,17 +15,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.Material3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import aki.tr.provider.model.Provider
 import aki.tr.provider.validation.EndpointValidation
 import aki.tr.provider.validation.EndpointValidationResult
+import aki.tr.ui.components.ExpressiveIconButton
+import aki.tr.ui.components.ExpressiveTextButton
 
 /**
  * Dialog for creating or editing a provider.
@@ -60,6 +60,7 @@ import aki.tr.provider.validation.EndpointValidationResult
  * @param onModelSearchQueryChange Callback when the model search query changes.
  * @param isCreating True if this is a new provider creation.
  */
+@Material3ExpressiveApi
 @Composable
 fun ProviderEditDialog(
     provider: Provider?,
@@ -156,7 +157,7 @@ fun ProviderEditDialog(
                             modifier = Modifier.weight(1f)
                         )
                         if (!isCreating) {
-                            TextButton(
+                            ExpressiveTextButton(
                                 onClick = {
                                     if (!isFetchingModels) onFetchModels()
                                     showModelPicker = true
@@ -202,7 +203,7 @@ fun ProviderEditDialog(
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.weight(1f)
                             )
-                            IconButton(onClick = { onRemoveKey(key) }) {
+                            ExpressiveIconButton(onClick = { onRemoveKey(key) }) {
                                 Icon(
                                     Icons.Default.Delete,
                                     contentDescription = "Remove key",
@@ -223,13 +224,13 @@ fun ProviderEditDialog(
                         isError = keyError != null,
                         supportingText = keyError?.let { { Text(it) } },
                         trailingIcon = {
-                            TextButton(
+                            ExpressiveTextButton(
                                 onClick = {
-                                    if (newKey.isBlank()) return@TextButton
+                                    if (newKey.isBlank()) return@ExpressiveTextButton
                                     val trimmed = newKey.trim()
                                     if (storedKeys.contains(trimmed)) {
                                         keyError = "Key already added"
-                                        return@TextButton
+                                        return@ExpressiveTextButton
                                     }
                                     onAddKey(trimmed)
                                     newKey = ""
@@ -252,7 +253,7 @@ fun ProviderEditDialog(
             }
         },
         confirmButton = {
-            TextButton(
+            ExpressiveTextButton(
                 onClick = {
                     if (EndpointValidation.isSafeToSave(endpoint)) {
                         onSave(
@@ -267,14 +268,11 @@ fun ProviderEditDialog(
         dismissButton = {
             Row {
                 if (!isCreating) {
-                    TextButton(
-                        onClick = onDelete,
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
-                    ) { Text("Delete") }
+                    ExpressiveTextButton(
+                        onClick = onDelete
+                    ) { Text("Delete", color = MaterialTheme.colorScheme.error) }
                 }
-                TextButton(onClick = onDismiss) { Text("Cancel") }
+                ExpressiveTextButton(onClick = onDismiss) { Text("Cancel") }
             }
         }
     )
@@ -317,7 +315,7 @@ private fun ModelPickerSection(
                 "Select Model",
                 style = MaterialTheme.typography.titleSmall
             )
-            TextButton(onClick = onClose) { Text("Close") }
+            ExpressiveTextButton(onClick = onClose) { Text("Close") }
         }
 
         OutlinedTextField(

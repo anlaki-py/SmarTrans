@@ -13,16 +13,15 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.Material3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
@@ -43,6 +42,8 @@ import androidx.compose.ui.unit.dp
 import aki.tr.config.model.LanguageProfile
 import aki.tr.provider.model.Provider
 import aki.tr.settings.viewmodel.SettingsViewModel
+import aki.tr.ui.components.ExpressiveIconButton
+import aki.tr.ui.components.ExpressiveTextButton
 import aki.tr.ui.components.SectionHeader
 
 /**
@@ -50,6 +51,7 @@ import aki.tr.ui.components.SectionHeader
  * Each section is kept small; dialogs and dismiss backgrounds are in their own files.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@Material3ExpressiveApi
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
@@ -71,9 +73,7 @@ fun SettingsScreen(
             TopAppBar(
                 title = { Text("Settings") },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        onBack()
-                    }) {
+                    ExpressiveIconButton(onClick = { onBack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -97,7 +97,7 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SectionHeader("PROVIDERS", noPadding = true)
-                    TextButton(onClick = { creatingNewProvider = true }) { Text("Add New") }
+                    ExpressiveTextButton(onClick = { creatingNewProvider = true }) { Text("Add New") }
                 }
             }
             items(items = state.providers, key = { it.id }) { provider ->
@@ -127,7 +127,7 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SectionHeader("LANGUAGES", noPadding = true)
-                    TextButton(onClick = { creatingNewLanguage = true }) { Text("Add New") }
+                    ExpressiveTextButton(onClick = { creatingNewLanguage = true }) { Text("Add New") }
                 }
             }
             items(items = state.config.languages, key = { it.id }) { lang ->
@@ -172,14 +172,14 @@ fun SettingsScreen(
                         .padding(top = 32.dp, bottom = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    TextButton(
+                    ExpressiveTextButton(
                         onClick = {
                             uriHandler.openUri("https://github.com/anlaki-py/SmarTrans/releases/latest")
                         }
                     ) {
                         Text("Check for Updates")
                     }
-                    TextButton(
+                    ExpressiveTextButton(
                         onClick = {
                             uriHandler.openUri("https://anlaki.dev")
                         }

@@ -4,11 +4,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Material3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
+import aki.tr.ui.components.ExpressiveTextButton
 
 /**
  * Confirmation dialog for deleting a language profile.
@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
  * @param onConfirm Callback when the user confirms deletion.
  * @param onDismiss Callback when the user cancels.
  */
+@Material3ExpressiveApi
 @Composable
 fun DeleteLanguageDialog(
     languageName: String,
@@ -29,13 +30,10 @@ fun DeleteLanguageDialog(
         title = { Text("Delete Language") },
         text = { Text("Are you sure you want to remove \"$languageName\"?") },
         confirmButton = {
-            TextButton(
-                onClick = onConfirm,
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.error
-                )
-            ) { Text("Delete") }
+            ExpressiveTextButton(onClick = onConfirm) {
+                Text("Delete", color = MaterialTheme.colorScheme.error)
+            }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+        dismissButton = { ExpressiveTextButton(onClick = onDismiss) { Text("Cancel") } }
     )
 }
