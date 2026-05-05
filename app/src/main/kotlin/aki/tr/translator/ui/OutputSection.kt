@@ -20,7 +20,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicatorDefaults
@@ -53,8 +52,6 @@ private fun TranslateButton(onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Icon(Icons.Default.Translate, contentDescription = null)
-        Spacer(Modifier.width(8.dp))
         Text("TRANSLATE", fontWeight = FontWeight.Bold)
     }
 }
