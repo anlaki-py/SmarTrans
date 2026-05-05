@@ -117,7 +117,8 @@ fun ColumnScope.OutputSection(
 
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .weight(1f)
+                        .fillMaxWidth()
                         .fadingEdge(outputScrollState)
                 ) {
                     when {
