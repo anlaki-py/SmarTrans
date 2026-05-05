@@ -3,6 +3,7 @@ package aki.tr.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.Material3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.darkColorScheme
@@ -61,6 +62,7 @@ private val LightColorScheme = lightColorScheme(
     outline = md_theme_light_outline
 )
 
+@Material3ExpressiveApi
 @Composable
 fun AkiTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

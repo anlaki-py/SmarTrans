@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Material3ExpressiveApi
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -24,6 +25,7 @@ import aki.tr.config.model.LanguageProfile
 /**
  * Compact chip showing the active language name with a dropdown arrow.
  */
+@Material3ExpressiveApi
 @Composable
 fun LanguageSelector(
     language: LanguageProfile?,

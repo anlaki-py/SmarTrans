@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Material3ExpressiveApi
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -26,6 +27,7 @@ import aki.tr.provider.model.Provider
 /**
  * Compact chip showing the active provider name with a robot icon.
  */
+@Material3ExpressiveApi
 @Composable
 fun ProviderSelector(
     provider: Provider?,

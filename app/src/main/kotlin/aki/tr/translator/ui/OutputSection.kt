@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.LoadingIndicatorDefaults
+import androidx.compose.material3.Material3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,6 +44,7 @@ import aki.tr.ui.components.fadingEdge
  * Output section showing the translated result, loading indicator, or error.
  * Adapts layout direction to match the target language's RTL setting.
  */
+@Material3ExpressiveApi
 @Composable
 fun ColumnScope.OutputSection(
     state: TranslatorUiState,

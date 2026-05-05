@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Material3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.runtime.Composable
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
  * Red background revealed when swiping a language item to dismiss.
  * Shows a scaling delete icon.
  */
+@Material3ExpressiveApi
 @Composable
 fun DismissBackground(targetValue: SwipeToDismissBoxValue) {
     val color by animateColorAsState(

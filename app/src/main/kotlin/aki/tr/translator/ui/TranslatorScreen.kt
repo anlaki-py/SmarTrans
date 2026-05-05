@@ -1,6 +1,7 @@
 package aki.tr.translator.ui
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.material3.Material3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +44,7 @@ import aki.tr.ui.components.isRtl
  * Orchestrates child composables extracted into their own files.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@Material3ExpressiveApi
 @Composable
 fun TranslatorScreen(
     viewModel: TranslatorViewModel,

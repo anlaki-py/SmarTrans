@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Material3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 /**
  * Centred paste button that inserts clipboard content into the translator.
  */
+@Material3ExpressiveApi
 @Composable
 fun PasteButton(
     onClick: () -> Unit,
