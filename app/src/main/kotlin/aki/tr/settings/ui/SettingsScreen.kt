@@ -181,6 +181,13 @@ fun SettingsScreen(
                     }
                     ExpressiveTextButton(
                         onClick = {
+                            uriHandler.openUri("https://github.com/anlaki-py/SmarTrans")
+                        }
+                    ) {
+                        Text("Source Code")
+                    }
+                    ExpressiveTextButton(
+                        onClick = {
                             uriHandler.openUri("https://anlaki.dev")
                         }
                     ) {
