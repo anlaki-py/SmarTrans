@@ -56,8 +56,14 @@ fun TranslatorScreen(
     var showProviderSheet by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
+    var isInputFocused by remember { mutableStateOf(false) }
+
     val inputWeight by animateFloatAsState(
-        targetValue = if (state.output.isNotEmpty() || state.isLoading) 0.6f else 1f,
+        targetValue = when {
+            isInputFocused -> 1.4f
+            state.output.isNotEmpty() || state.isLoading -> 0.6f
+            else -> 1f
+        },
         animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
         label = "weight"
     )
@@ -120,6 +126,7 @@ fun TranslatorScreen(
                     onInputChange = { viewModel.onInputChange(it) },
                     isInputRtl = isInputRtl,
                     inputScrollState = inputScrollState,
+                    onFocusChanged = { isInputFocused = it },
                     modifier = Modifier.fillMaxSize()
                 )
                 PasteButton(

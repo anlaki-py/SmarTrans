@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,6 +38,7 @@ fun InputSection(
     onInputChange: (String) -> Unit,
     isInputRtl: Boolean,
     inputScrollState: ScrollState,
+    onFocusChanged: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -73,6 +75,7 @@ fun InputSection(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
+                .padding(bottom = 80.dp)
                 .fadingEdge(inputScrollState)
         ) {
             if (input.isEmpty()) {
@@ -94,6 +97,7 @@ fun InputSection(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(inputScrollState)
+                    .onFocusChanged { onFocusChanged(it.hasFocus) }
             )
         }
     }
