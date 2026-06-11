@@ -19,6 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +40,7 @@ fun InputSection(
     onInputChange: (String) -> Unit,
     isInputRtl: Boolean,
     inputScrollState: ScrollState,
+    focusRequester: FocusRequester,
     onFocusChanged: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -71,6 +74,7 @@ fun InputSection(
                 }
             }
         }
+
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -85,6 +89,7 @@ fun InputSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                 )
             }
+
             BasicTextField(
                 value = input,
                 onValueChange = onInputChange,
@@ -97,6 +102,7 @@ fun InputSection(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(inputScrollState)
+                    .focusRequester(focusRequester)
                     .onFocusChanged { onFocusChanged(it.hasFocus) }
             )
         }

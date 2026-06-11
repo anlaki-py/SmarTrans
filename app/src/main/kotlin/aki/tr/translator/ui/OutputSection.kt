@@ -1,5 +1,6 @@
 package aki.tr.translator.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -59,6 +61,7 @@ private fun TranslateButton(onClick: () -> Unit) {
 /**
  * Output section showing the translated result, loading indicator, or error.
  * Adapts layout direction to match the target language's RTL setting.
+ * Tapping the lower half calls [onTapLowerHalf] (used to dismiss keyboard).
  */
 @Material3ExpressiveApi
 @Composable
@@ -67,9 +70,11 @@ fun ColumnScope.OutputSection(
     outputLayoutDir: LayoutDirection,
     currentLang: LanguageProfile?,
     onCopy: () -> Unit,
-    onTranslate: () -> Unit
+    onTranslate: () -> Unit,
+    onTapLowerHalf: () -> Unit = {}
 ) {
     val outputScrollState = rememberScrollState()
+
     val weightFraction: Float = remember(state.output, state.isLoading) {
         val inpWeight = if (state.output.isNotEmpty() || state.isLoading) 0.6f else 1f
         2f - inpWeight
@@ -85,7 +90,8 @@ fun ColumnScope.OutputSection(
             tonalElevation = 4.dp
         ) {
             Column(
-                modifier = Modifier.padding(24.dp)
+                modifier = Modifier
+                    .padding(24.dp)
                     .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
             ) {
                 Row(
@@ -145,7 +151,8 @@ fun ColumnScope.OutputSection(
                                     style = MaterialTheme.typography.headlineSmall,
                                     color = if (state.output.isEmpty())
                                         MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                                    else MaterialTheme.colorScheme.onSurface,
+                                    else
+                                        MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .verticalScroll(outputScrollState)
@@ -153,6 +160,17 @@ fun ColumnScope.OutputSection(
                             }
                         }
                     }
+
+                    // Invisible overlay on the bottom half — tapping here dismisses the keyboard
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.5f)
+                            .clickable(indication = null, interactionSource = null) {
+                                onTapLowerHalf()
+                            }
+                    )
                 }
 
                 // Translate button shown when there's manual input that hasn't been translated yet.

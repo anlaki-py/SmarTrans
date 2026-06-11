@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +31,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -54,8 +57,8 @@ fun TranslatorScreen(
     val clipboard = LocalClipboardManager.current
     var showLangSheet by remember { mutableStateOf(false) }
     var showProviderSheet by remember { mutableStateOf(false) }
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var isInputFocused by remember { mutableStateOf(false) }
 
     val inputWeight by animateFloatAsState(
@@ -76,7 +79,13 @@ fun TranslatorScreen(
     }
     val isInputRtl = remember(state.input) { isRtl(state.input) }
     val outputLayoutDir = if (currentLang?.isRtl == true) LayoutDirection.Rtl else LayoutDirection.Ltr
+
     val inputScrollState = rememberScrollState()
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
 
     Scaffold(
         modifier = Modifier
@@ -126,22 +135,26 @@ fun TranslatorScreen(
                     onInputChange = { viewModel.onInputChange(it) },
                     isInputRtl = isInputRtl,
                     inputScrollState = inputScrollState,
+                    focusRequester = focusRequester,
                     onFocusChanged = { isInputFocused = it },
                     modifier = Modifier.fillMaxSize()
                 )
                 PasteButton(
                     modifier = Modifier.align(Alignment.BottomCenter),
-                    onClick = {
-                        clipboard.getText()?.text?.let { viewModel.onPaste(it) }
-                    }
+                    onClick = { clipboard.getText()?.text?.let { viewModel.onPaste(it) } }
                 )
             }
+
             OutputSection(
                 state = state,
                 outputLayoutDir = outputLayoutDir,
                 currentLang = currentLang,
                 onCopy = { clipboard.setText(AnnotatedString(state.output)) },
-                onTranslate = { viewModel.triggerTranslation() }
+                onTranslate = {
+                    focusRequester.freeFocus()
+                    viewModel.triggerTranslation()
+                },
+                onTapLowerHalf = { focusRequester.freeFocus() }
             )
         }
     }
@@ -156,7 +169,6 @@ fun TranslatorScreen(
             }
         )
     }
-
     if (showProviderSheet) {
         ProviderBottomSheet(
             state = state,
